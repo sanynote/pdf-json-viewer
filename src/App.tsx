@@ -1,22 +1,28 @@
-// src/App.tsx
-import JsonArea from "./components/json-area";
+import { useState } from "react";
 import PdfViewer from "./components/pdf-viewer";
+import JsonArea from "./components/json-area";
 
-function App() {
+export default function App() {
+  const [hoveredText, setHoveredText] = useState<string | null>(null);
+  const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
+
   return (
     <div className="flex h-screen">
-      {/* 왼쪽 PDF 영역 */}
       <div className="w-1/2 border-r overflow-auto">
-        <PdfViewer />
+        <PdfViewer
+          hoveredText={hoveredText}
+          setHoveredText={setHoveredText}
+          selectedIdx={selectedIdx}
+        />
       </div>
-
-      {/* 오른쪽 JSON 영역 */}
       <div className="w-1/2 p-4 overflow-y-auto">
         <h2 className="text-xl font-bold mb-4">JSON 데이터 리스트</h2>
-        <JsonArea />
+        <JsonArea
+          hoveredText={hoveredText}
+          setSelectedIdx={setSelectedIdx}
+          selectedIdx={selectedIdx}
+        />
       </div>
     </div>
   );
 }
-
-export default App;
