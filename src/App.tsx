@@ -1,20 +1,7 @@
 import { useEffect, useState } from "react";
 import PdfViewer from "./components/pdf-viewer";
 import JsonArea from "./components/json-area";
-
-interface TextBlock {
-  self_ref: string;
-  text: string;
-  prov: {
-    page_no: number;
-    bbox: {
-      l: number;
-      t: number;
-      r: number;
-      b: number;
-    };
-  }[];
-}
+import type { TextBlock } from "./types/types";
 
 export default function App() {
   const [blocks, setBlocks] = useState<TextBlock[]>([]);
@@ -26,7 +13,7 @@ export default function App() {
       .then((res) => res.json())
       .then((data) => {
         const filtered = data.texts.filter(
-          (b: any) => b.prov?.[0]?.page_no === 1
+          (b: TextBlock) => b.prov?.[0]?.page_no === 1
         );
         setBlocks(filtered);
       });

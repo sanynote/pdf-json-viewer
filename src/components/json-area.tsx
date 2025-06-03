@@ -1,21 +1,8 @@
 import { useEffect, useRef } from "react";
-
-interface JsonBlock {
-  self_ref: string;
-  text: string;
-  prov: {
-    page_no: number;
-    bbox: {
-      l: number;
-      t: number;
-      r: number;
-      b: number;
-    };
-  }[];
-}
+import type { TextBlock } from "../types/types";
 
 interface Props {
-  blocks: JsonBlock[];
+  blocks: TextBlock[];
   hoveredId: string | null;
   selectedIdx: number | null;
   setSelectedIdx: (index: number) => void;
@@ -57,7 +44,7 @@ export default function JsonArea({
                 : "bg-gray-50 hover:bg-gray-100"
             }`}
           >
-            <span className="text-xs text-gray-500">#{idx}</span> – {block.text}
+            {block.text}
           </div>
         );
       })}

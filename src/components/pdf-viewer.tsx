@@ -1,22 +1,10 @@
 import { useEffect, useRef } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
-import "react-pdf/dist/esm/Page/AnnotationLayer.css";
+import type { TextBlock } from "../types/types";
 import pdfWorker from "../worker/pdf-worker";
+import "react-pdf/dist/esm/Page/AnnotationLayer.css";
 
 pdfjs.GlobalWorkerOptions.workerSrc = pdfWorker;
-
-interface BBox {
-  l: number;
-  t: number;
-  r: number;
-  b: number;
-}
-
-interface TextBlock {
-  self_ref: string;
-  text: string;
-  prov: { page_no: number; bbox: BBox }[];
-}
 
 interface Props {
   blocks: TextBlock[];
@@ -34,8 +22,7 @@ export default function PdfViewer({
   const selectedRef = useRef<HTMLDivElement | null>(null);
 
   const pdfWidth = 600;
-  const pdfOriginalWidth = 595.276;
-  const scale = pdfWidth / pdfOriginalWidth;
+  const scale = pdfWidth / 595.276;
 
   useEffect(() => {
     if (selectedRef.current) {
@@ -45,6 +32,14 @@ export default function PdfViewer({
       });
     }
   }, [selectedIdx]);
+
+  const getBlockStyle = (bbox: any) => ({
+    left: bbox.l * scale,
+    top: (842 - bbox.t) * scale,
+    width: (bbox.r - bbox.l) * scale,
+    height: (bbox.t - bbox.b) * scale,
+    pointerEvents: "auto",
+  });
 
   return (
     <div className="flex justify-center p-4">
@@ -62,35 +57,20 @@ export default function PdfViewer({
             const prov = block.prov?.[0];
             if (!prov) return null;
 
-            const { l, r, t, b } = prov.bbox;
-            const left = l * scale;
-            const top = (842 - t) * scale;
-            const width = (r - l) * scale;
-            const height = (t - b) * scale;
-
             const isHovered = hoveredId === block.self_ref;
             const isSelected = selectedIdx === idx;
-            const isVisible = isHovered || isSelected;
+            const isActive = isHovered || isSelected;
 
             return (
               <div
                 key={block.self_ref}
                 ref={isSelected ? selectedRef : null}
-                onMouseEnter={() => {
-                  setHoveredId(block.self_ref);
-                  console.log(block.self_ref, "hovered");
-                }}
+                onMouseEnter={() => setHoveredId(block.self_ref)}
                 onMouseLeave={() => setHoveredId(null)}
                 className={`absolute z-40 ${
-                  isVisible ? "border border-gray-400 bg-gray-100/40" : ""
+                  isActive ? "border border-gray-400 bg-gray-100/40" : ""
                 }`}
-                style={{
-                  left,
-                  top,
-                  width,
-                  height,
-                  pointerEvents: "auto",
-                }}
+                style={getBlockStyle(prov.bbox) as React.CSSProperties}
                 title={block.text}
               />
             );

@@ -1,54 +1,86 @@
-# React + TypeScript + Vite
+PDF-JSON 양방향 인터랙션 과제
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+이 프로젝트는 PDF 문서와 해당 문서를 파싱한 JSON 데이터를 양방향으로 연결하여,PDF ↔ JSON 하이라이트 및 스크롤 연동을 구현한 React 웹 애플리케이션입니다.
 
-Currently, two official plugins are available:
+📌 과제 목적
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+PDF의 특정 텍스트 영역에 마우스를 올리면 → JSON 항목 하이라이트 및 스크롤
 
-## Expanding the ESLint configuration
+JSON 항목을 클릭하면 → PDF의 해당 위치로 이동 및 시각적 강조
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+마우스 오버/클릭 시 자연스러운 인터랙션 제공
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+🎯 주요 기능
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+기능
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+설명
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+PDF → JSON 연동
+
+PDF 텍스트 영역에 마우스를 올리면 오른쪽 JSON 자동 스크롤 + 강조
+
+JSON → PDF 연동
+
+JSON 항목 클릭 시 PDF 해당 위치 강조 및 가운데 스크롤
+
+하이라이트 처리
+
+테두리 + 반투명 배경 강조 UI 구현
+
+중복 텍스트 대응
+
+텍스트가 중복되어도 정확한 항목만 매칭 (self_ref 기반)
+
+🧱 기술 스택
+
+React + TypeScript
+
+Tailwind CSS
+
+react-pdf
+
+🗂️ 폴더 구조
+
+src/
+├── components/
+│ ├── pdf-viewer.tsx
+│ └── json-area.tsx
+├── types/
+│ └── types.ts
+├── worker/
+│ └── pdf-worker.ts
+└── App.tsx
+
+🧠 핵심 구현 방식
+
+📌 식별자 기반 매칭
+
+JSON과 PDF 블록 간의 연동은 self_ref라는 고유 ID를 기준으로 수행
+
+중복 텍스트로 인한 다중 강조 문제를 방지
+
+📌 스타일 조건부 처리
+
+PDF에 마우스 오버 가능한 영역을 항상 렌더링하여 이벤트 감지 가능
+
+border + background 스타일은 조건부 적용으로 처리
+
+✅ 실행 방법
+
+npm install
+npm run dev
+
+public/1.report.pdf
+
+public/1.report.json
+
+이 두 파일이 반드시 존재해야 합니다.
+
+✍️ 개선 방향 (선택사항)
+
+다중 페이지 PDF 지원
+
+검색 기능 추가
+
+확대/축소 기능
