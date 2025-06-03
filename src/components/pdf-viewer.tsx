@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/esm/Page/AnnotationLayer.css";
 import pdfWorker from "../worker/pdf-worker";
@@ -13,34 +13,29 @@ interface BBox {
 }
 
 interface TextBlock {
+  self_ref: string;
   text: string;
   prov: { page_no: number; bbox: BBox }[];
 }
 
 interface Props {
-  hoveredText: string | null;
-  setHoveredText: (text: string | null) => void;
+  blocks: TextBlock[];
+  hoveredId: string | null;
+  setHoveredId: (id: string | null) => void;
   selectedIdx: number | null;
 }
 
 export default function PdfViewer({
-  hoveredText,
-  setHoveredText,
+  blocks,
+  hoveredId,
+  setHoveredId,
   selectedIdx,
 }: Props) {
-  const [blocks, setBlocks] = useState<TextBlock[]>([]);
   const selectedRef = useRef<HTMLDivElement | null>(null);
 
   const pdfWidth = 600;
   const pdfOriginalWidth = 595.276;
   const scale = pdfWidth / pdfOriginalWidth;
-
-  useEffect(() => {
-    fetch("/1.report.json")
-      .then((res) => res.json())
-      .then((data) => setBlocks(data.texts))
-      .catch((err) => console.error("JSON 로딩 실패:", err));
-  }, []);
 
   useEffect(() => {
     if (selectedRef.current) {
@@ -60,11 +55,12 @@ export default function PdfViewer({
             width={pdfWidth}
             renderTextLayer={false}
             renderAnnotationLayer={false}
+            className="pointer-events-none"
           />
 
           {blocks.map((block, idx) => {
             const prov = block.prov?.[0];
-            if (!prov || prov.page_no !== 1) return null;
+            if (!prov) return null;
 
             const { l, r, t, b } = prov.bbox;
             const left = l * scale;
@@ -72,20 +68,21 @@ export default function PdfViewer({
             const width = (r - l) * scale;
             const height = (t - b) * scale;
 
+            const isHovered = hoveredId === block.self_ref;
             const isSelected = selectedIdx === idx;
-            const isActive =
-              isSelected || hoveredText?.trim() === block.text.trim();
+            const isVisible = isHovered || isSelected;
 
             return (
               <div
-                key={idx}
+                key={block.self_ref}
                 ref={isSelected ? selectedRef : null}
-                onMouseEnter={() => setHoveredText(block.text)}
-                onMouseLeave={() => setHoveredText(null)}
+                onMouseEnter={() => {
+                  setHoveredId(block.self_ref);
+                  console.log(block.self_ref, "hovered");
+                }}
+                onMouseLeave={() => setHoveredId(null)}
                 className={`absolute z-40 ${
-                  isActive
-                    ? "border border-gray-400 bg-gray-100/40"
-                    : "pointer-events-auto"
+                  isVisible ? "border border-gray-400 bg-gray-100/40" : ""
                 }`}
                 style={{
                   left,
